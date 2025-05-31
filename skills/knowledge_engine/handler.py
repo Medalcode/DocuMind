@@ -1,4 +1,4 @@
-from core.engine import DocuMindEngine
+from backend.core.engine import DocuMindEngine
 
 engine = DocuMindEngine()
 

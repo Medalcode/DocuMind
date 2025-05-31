@@ -1,0 +1,5 @@
+libraries:
+  1:
+    name: Tareas
+    data: data/tareas
+    db: db/tareas
