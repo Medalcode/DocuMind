@@ -1,0 +1,9 @@
+langchain
+langchain-ollama
+chromadb
+langchain-community
+pypdf
+rich
+filelock
+python-dotenv
+pytest

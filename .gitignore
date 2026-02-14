@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# Pytest cache
+.pytest_cache/
+pytest_cache/
+
+# Editor directories
+.vscode/
+.idea/
+
+# Env files
+.env
+.env.*
+
+# Databases and Chroma dirs
+db/
+db_*/
+*.sqlite3
+
+# OS files
+.DS_Store
