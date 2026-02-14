@@ -1,49 +1,88 @@
-# Bitácora de desarrollo
+# DocuMind
 
-## Tareas realizadas
+Proyecto asistente RAG (Retrieval-Augmented Generation) para consultas sobre colecciones de PDFs.
 
-- Crear estructura de carpetas para bibliotecas y bases de datos (data/aws, data/debian, data/cisco, db_aws, db_debian, db_cisco)
-- Crear script de auto-ingesta de PDFs nuevos (auto_ingesta.py)
-- Integrar auto-ingesta al script principal de consola (rag_terminal.py)
-- Agregar instrucciones de uso y ejecución al README
+## Resumen rápido
 
-## Tareas pendientes
+Este repositorio contiene herramientas para:
 
-- Mejorar la gestión de errores y mensajes amigables en la interfaz
-- Añadir historial de consultas por usuario
-- Permitir selección dinámica de modelos Ollama
-- Implementar soporte para otros tipos de documentos (Markdown, TXT)
-- Agregar tests automáticos y documentación técnica avanzada
-# Instrucciones para ejecutar tu asistente RAG local
+- Indexar PDFs en un vectorstore persistente (Chroma) mediante `auto_ingesta.py`.
+- Realizar consultas RAG usando un LLM local vía Ollama con `rag_terminal.py`.
+- Extender funcionalidad mediante `skills/` (plugins que exponen handlers y manifests).
 
-1. Instala las dependencias necesarias (si no lo has hecho):
+## Instalación (entorno virtual)
 
-```
-pip install langchain langchain-community langchain-ollama chromadb pypdf rich
+1. Crear y activar un entorno virtual (Windows PowerShell):
+
+```powershell
+python -m venv .venv
+.venv\Scripts\activate
 ```
 
-2. Asegúrate de tener Ollama instalado y los modelos descargados:
+2. Instalar dependencias:
 
+```powershell
+pip install -r requirements.txt
 ```
+
+3. (Opcional) Configurar variables de entorno copiando el ejemplo:
+
+```powershell
+copy .env.example .env
+# editar .env según sea necesario
+```
+
+## Requisitos externos
+
+- Ollama (modelo LLM local). Instalar y descargar modelos según necesites:
+
+```bash
 curl -fsSL https://ollama.com/install.sh | sh
 ollama pull llama3.1
 ollama pull nomic-embed-text
 ```
 
-3. Coloca tus archivos PDF en las carpetas:
-	- data/aws/
-	- data/debian/
-	- data/cisco/
+## Uso básico
 
-4. Ejecuta el asistente desde la terminal:
+1. Coloca tus PDFs en subcarpetas bajo la carpeta `data/`, por ejemplo `data/aws`.
+2. Indexa documentos (opcional, `rag_terminal.py` puede iniciar ingesta automática):
 
+```powershell
+python auto_ingesta.py
 ```
+
+3. Ejecuta la interfaz de consulta:
+
+```powershell
 python rag_terminal.py
 ```
 
-El sistema indexará automáticamente los nuevos PDFs y te permitirá consultar cada biblioteca desde una interfaz profesional en la terminal.
+## Desarrollo y pruebas
 
----
+- Ejecutar tests:
 
-¿Dudas o problemas? Revisa los mensajes de error en la terminal o consulta el código fuente para personalizarlo a tus necesidades.
-# DocuMind
+```powershell
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+pytest -q
+```
+
+- Recomendación: usar `.venv` local y no commitearla (ya incluida en `.gitignore`).
+
+## Docker (opcional)
+
+Construir y ejecutar la imagen:
+
+```bash
+docker build -t documind .
+docker run --rm -it -v $(pwd)/data:/app/data documind
+```
+
+## Contribuir
+
+Para añadir una `skill`, crea una carpeta `skills/{nombre}/` con `manifest.yaml` y `handler.py` que implemente `handle(input: dict) -> dict`.
+
+## Soporte
+
+Si tienes problemas, abre un issue en el repositorio o revisa los archivos `auto_ingesta.py` y `rag_terminal.py` para entender los parámetros y el flujo.
