@@ -1,0 +1,14 @@
+name: knowledge_engine
+version: 1.0
+description: Motor universal para gestión de conocimiento (RAG + Ingesta)
+entrypoint: handler.py
+inputs:
+  - action: str (search, summarize, ingest)
+  - corpus: str
+  - query: str
+outputs:
+  - result: str
+  - metadata: dict
+permissions:
+  - read: data
+  - write: vectorstore

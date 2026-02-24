@@ -1,7 +1,14 @@
-import importlib
+import pytest
+from core.engine import DocuMindEngine
 
+def test_engine_init():
+    engine = DocuMindEngine()
+    assert len(engine.LIBRARIES) == 3
+    assert engine.model_name == "llama3.1"
 
-def test_auto_ingesta_importable():
-    # Comprobar que el módulo principal de ingesta puede importarse
-    mod = importlib.import_module('auto_ingesta')
-    assert mod is not None
+def test_engine_library_data():
+    engine = DocuMindEngine()
+    for lib_id, cfg in engine.LIBRARIES.items():
+        assert "name" in cfg
+        assert "data" in cfg
+        assert "db" in cfg

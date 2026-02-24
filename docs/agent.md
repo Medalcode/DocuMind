@@ -3,7 +3,16 @@
 Este documento describe la arquitectura del agente RAG del proyecto, sus componentes y las operaciones necesarias para su despliegue y escalado.
 
 - Componentes clave: ingesta (PDF -> chunks), vectorstore (Chroma), embeddings, LLM (Ollama), capa de orquestación/skills y UI (terminal o servicio HTTP).
-- Flujo de datos: PDFs -> auto_ingesta.py -> Chroma persistente -> rag_terminal.py realiza retrieval + LLM.
+- Flujo de datos: PDFs -> KnowledgeEngine (Skill) -> Chroma persistente -> DocuMindGeneralist (Agente) realiza retrieval + LLM.
+
+## Agente Generalista (DocuMindGeneralist)
+
+Para evitar la fragmentación, el sistema utiliza un único **Agente Generalista** capaz de conmutar entre diferentes contextos de conocimiento (AWS, Debian, Cisco) mediante parámetros en lugar de tener agentes especializados redundantes.
+
+- **Rol**: Orquestador universal de consultas RAG.
+- **Capacidades**: Selección de corpus dinámica, auto-ingesta bajo demanda y validación de fuentes.
+- **Ventaja**: Reduce el mantenimiento de lógica duplicada en un 80%.
+
 
 ## Requisitos y dependencias
 

@@ -8,21 +8,31 @@ Una *skill* es una unidad funcional autocontenida que expone una responsabilidad
 - `skills/{skill_name}/handler.py` — implementa `handle(input: dict) -> dict`.
 - `skills/{skill_name}/tests/` — pruebas unitarias de la skill.
 
-Ejemplo de convención de `manifest.yaml`:
+## Super-Skills Paramétricas (Recomendado)
+
+En lugar de crear múltiples skills para tareas similares, se deben consolidar en **Super-Skills** que reciben un parámetro `action` o `task`. Esto maximiza la reutilización de la lógica de conexión a bases de datos y LLMs.
+
+### Skill: KnowledgeEngine
+
+Consolida: `pdf_finder`, `pdf_summarizer`, `data_ingestor`.
 
 ```yaml
-name: pdf_finder
-version: 0.1
-description: Busca y resume fragmentos relevantes en PDFs
+name: knowledge_engine
+version: 1.0
+description: Motor universal para gestión de conocimiento (RAG + Ingesta)
 entrypoint: handler.py
 inputs:
-  - query: str
+  - action: enum [search, summarize, ingest]
+  - corpus: str (ej. "aws", "debian")
+  - query: str (opcional para ingest)
 outputs:
-  - answer: str
-  - sources: list
+  - result: str
+  - metadata: dict
 permissions:
   - read: data
+  - write: vectorstore
 ```
+
 
 ## Registro y descubrimiento
 

@@ -1,88 +1,59 @@
 # DocuMind
 
-Proyecto asistente RAG (Retrieval-Augmented Generation) para consultas sobre colecciones de PDFs.
+Asistente RAG (Retrieval-Augmented Generation) de alto rendimiento para consultas sobre colecciones de PDFs, diseñado con una arquitectura **Lean** y modular.
 
-## Resumen rápido
+## 🚀 Arquitectura "Lean"
 
-Este repositorio contiene herramientas para:
+DocuMind ha sido refactorizado para eliminar la fragmentación y la sobreingeniería, centralizando su inteligencia en un motor core y utilizando Super-Skills paramétricas.
 
-- Indexar PDFs en un vectorstore persistente (Chroma) mediante `auto_ingesta.py`.
-- Realizar consultas RAG usando un LLM local vía Ollama con `rag_terminal.py`.
-- Extender funcionalidad mediante `skills/` (plugins que exponen handlers y manifests).
+- **`core/engine.py`**: Motor centralizado que gestiona múltiples bibliotecas (AWS, Debian, Cisco), la ingesta y el retrieval.
+- **`rag_terminal.py`**: Interfaz de usuario optimizada (Thin UI) que interactúa con el motor central.
+- **`skills/knowledge_engine`**: Super-Skill paramétrica que consolida búsqueda, resumen e ingesta en un solo componente.
 
-## Instalación (entorno virtual)
+## 🛠️ Instalación
 
-1. Crear y activar un entorno virtual (Windows PowerShell):
+1. **Entorno Virtual (Windows PowerShell):**
+   ```powershell
+   python -m venv .venv
+   .venv\Scripts\activate
+   ```
 
-```powershell
-python -m venv .venv
-.venv\Scripts\activate
-```
+2. **Instalar dependencias:**
+   ```powershell
+   pip install -r requirements.txt
+   ```
 
-2. Instalar dependencias:
+3. **Requisitos de Modelos (Ollama):**
+   Asegúrate de tener [Ollama](https://ollama.com/) instalado y los modelos descargados:
+   ```bash
+   ollama pull llama3.1
+   ollama pull nomic-embed-text
+   ```
 
-```powershell
-pip install -r requirements.txt
-```
+## 📖 Uso
 
-3. (Opcional) Configurar variables de entorno copiando el ejemplo:
-
-```powershell
-copy .env.example .env
-# editar .env según sea necesario
-```
-
-## Requisitos externos
-
-- Ollama (modelo LLM local). Instalar y descargar modelos según necesites:
-
-```bash
-curl -fsSL https://ollama.com/install.sh | sh
-ollama pull llama3.1
-ollama pull nomic-embed-text
-```
-
-## Uso básico
-
-1. Coloca tus PDFs en subcarpetas bajo la carpeta `data/`, por ejemplo `data/aws`.
-2. Indexa documentos (opcional, `rag_terminal.py` puede iniciar ingesta automática):
-
-```powershell
-python auto_ingesta.py
-```
-
-3. Ejecuta la interfaz de consulta:
-
+### Interfaz del Terminal
+Ejecuta la interfaz interactiva para consultar cualquiera de las bases de conocimiento:
 ```powershell
 python rag_terminal.py
 ```
+*El sistema detectará automáticamente nuevos PDFs en la carpeta `data/` al iniciar.*
 
-## Desarrollo y pruebas
+### Extensibilidad (Skills)
+Para extender la funcionalidad, usa la arquitectura de **Super-Skills**. La `knowledge_engine` acepta acciones como `search` e `ingest` mediante parámetros, evitando la creación de múltiples plugins redundantes.
 
-- Ejecutar tests:
+## 🧪 Desarrollo y Pruebas
 
+Ejecutar la suite de tests unitarios e integración:
 ```powershell
-python -m venv .venv
-.venv\Scripts\activate
-pip install -r requirements.txt
-pytest -q
+pytest -v
 ```
 
-- Recomendación: usar `.venv` local y no commitearla (ya incluida en `.gitignore`).
-
-## Docker (opcional)
-
-Construir y ejecutar la imagen:
-
+## 🐳 Docker
 ```bash
 docker build -t documind .
-docker run --rm -it -v $(pwd)/data:/app/data documind
+docker run --rm -it -v ${PWD}/data:/app/data documind
 ```
 
-## Contribuir
-
-Para añadir una `skill`, crea una carpeta `skills/{nombre}/` con `manifest.yaml` y `handler.py` que implemente `handle(input: dict) -> dict`.
-
-## Soporte
-
-Si tienes problemas, abre un issue en el repositorio o revisa los archivos `auto_ingesta.py` y `rag_terminal.py` para entender los parámetros y el flujo.
+## 📜 Licencia e Información
+Este proyecto sigue los principios de **Agentes de IA Generalistas** para minimizar el mantenimiento y maximizar la reutilización del código.
