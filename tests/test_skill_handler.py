@@ -1,5 +1,6 @@
 from skills.knowledge_engine import handler
 
+
 def test_knowledge_engine_search_fallback():
     # Test fallback para parámetros no existentes
     res = handler.handle({'action': 'search', 'corpus': 'inexistente', 'query': 'hola'})

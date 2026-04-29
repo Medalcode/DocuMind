@@ -1,8 +1,10 @@
 import time
+
 from rich.console import Console
 from rich.panel import Panel
-from rich.prompt import Prompt, IntPrompt
+from rich.prompt import IntPrompt, Prompt
 from rich.table import Table
+
 from core.engine import DocuMindEngine
 
 console = Console()
@@ -28,7 +30,7 @@ def chat_loop(qa_chain, lib_name):
             start_time = time.time()
             res = qa_chain.invoke(query)
             end_time = time.time()
-        
+
         console.print(Panel(res["result"], title="Respuesta", border_style="green"))
         paginas = set([str(doc.metadata.get('page', '?')) for doc in res['source_documents']])
         console.print(f"[dim]Fuentes: {lib_name} - Pág(s): {', '.join(paginas)} | Tiempo: {end_time - start_time:.2f}s[/dim]\n")
@@ -36,16 +38,16 @@ def chat_loop(qa_chain, lib_name):
 def main():
     with console.status("[bold yellow]Iniciando Auto-Ingesta...", spinner="bouncingBar"):
         engine.auto_ingesta()
-    
+
     while True:
         mostrar_menu()
         opcion = IntPrompt.ask("Seleccione una opción (0 para salir)", choices=[str(k) for k in engine.LIBRARIES.keys()] + ["0"])
         if opcion == 0:
             break
-        
+
         with console.status("[bold green]Cargando base de conocimientos...", spinner="aesthetic"):
             chain = engine.get_qa_chain(opcion)
-        
+
         if chain:
             chat_loop(chain, engine.LIBRARIES[opcion]["name"])
         else:
