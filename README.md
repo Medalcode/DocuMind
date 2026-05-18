@@ -1,3 +1,5 @@
+[![CI](https://github.com/Medalcode/DocuMind/actions/workflows/ci.yml/badge.svg)](https://github.com/Medalcode/DocuMind/actions/workflows/ci.yml)
+
 # DocuMind 🧠
 
 > **Asistente RAG (Retrieval-Augmented Generation) de alto rendimiento para consultas sobre colecciones de PDFs.**  
