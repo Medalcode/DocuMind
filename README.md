@@ -2,26 +2,45 @@
 
 # DocuMind 🧠
 
-> **Asistente RAG (Retrieval-Augmented Generation) de alto rendimiento para consultas sobre colecciones de PDFs.**  
-> Ahora con una arquitectura Web Moderna, soporte Multi-IA y gestión de documentos desde el navegador.
+> **Plataforma de Gestión de Conocimiento e Inferencia basada en RAG (Retrieval-Augmented Generation).**  
+> Diseñada con una arquitectura modular (React/FastAPI) y soporte para múltiples proveedores de IA, enfocada en la trazabilidad y la observabilidad del ciclo de vida del documento.
 
 ---
 
-## ✨ ¿Qué es DocuMind?
+## ✨ Características Técnicas (v2.0)
 
-DocuMind es un sistema RAG (Retrieval-Augmented Generation) avanzado que te permite conversar con tus documentos PDF usando Inteligencia Artificial. Ya sea para estudiar certificaciones técnicas, buscar en manuales o leer reportes extensos, DocuMind funciona como tu "Cerebro" personal.
+- 🏗️ **Arquitectura Desacoplada:** Frontend SPA en React + Vite y un Backend robusto en FastAPI.
+- 🖥️ **Interfaz Web Moderna (SPA):** Diseñada en React + Vite, con estética *Glassmorphism* y un diseño premium.
+- 🤖 **Soporte Multi-IA:** Integración flexible con Ollama, OpenAI, Groq y Gemini.
+- 📁 **Gestión Visual de Cerebros:** Crea y gestiona distintos "Cerebros de IA" (Espacios de nombres) directamente desde la interfaz.
+- 📎 **Soporte Multimodal de Documentos (Sprint 3):** Sube archivos `.pdf`, `.docx` (Word), `.md` (Markdown) y `.txt`. La interfaz los procesa de forma agnóstica.
+- 🌐 **Conector Web Inteligente (Sprint 4):** Pega cualquier URL (documentación, Wikipedia, artículos, o código raw de GitHub) y DocuMind hará web scraping en tiempo real, extraerá el texto limpio y lo integrará a tu base de conocimientos con un solo clic.
+- 🔄 **Control de Versiones y Sincronización:** Si subes una versión actualizada de un documento existente, DocuMind detecta la nueva fecha de modificación, elimina los vectores obsoletos y reindexa el nuevo contenido automáticamente.
+- ⚡ **Embeddings Nativos Optimizados:** Uso de `HuggingFaceEmbeddings` ejecutándose nativamente en CPU.
 
-### 🌟 Nuevas Características (v2.0)
-- 🖥️ **Interfaz Web Moderna (SPA):** Diseñada en React + Vite, con estética *Glassmorphism* y un diseño premium. Olvídate de la terminal.
-- 🤖 **Soporte Multi-IA:** No estás limitado a un solo motor. Puedes usar:
-  - **Ollama (Local)**: Privacidad absoluta y 100% offline.
-  - **Groq**: Inferencia ultrarrápida usando Llama 3.1.
-  - **OpenAI (GPT-4o)**: Toda la potencia de ChatGPT.
-  - **Google Gemini**: Excelente rendimiento y contexto amplio.
-  - *(Auto-detección inteligente de API Keys integrada en la interfaz).*
-- 📁 **Gestión Visual de Cerebros:** Crea, elimina y gestiona distintos "Cerebros de IA" directamente desde la interfaz, sin tocar archivos de código.
-- 📎 **Subida de PDFs Integrada:** Selecciona tus PDFs desde la interfaz y se subirán e indexarán automáticamente en segundo plano.
-- ⚡ **Embeddings Nativos:** Desacoplamos la indexación usando `HuggingFaceEmbeddings`, permitiendo crear la base de datos vectorial de forma ultrarrápida y 100% local en CPU, sin necesidad de tener un LLM local corriendo para este proceso.
+---
+
+## 🔬 Decisiones de Arquitectura y Pipeline RAG
+
+### 1. ¿Por qué ChromaDB + HuggingFace?
+La combinación de **Chroma** como vectorstore local persistente junto con **HuggingFaceEmbeddings** permite indexar miles de páginas de PDFs en hardware de consumo sin saturar la memoria gráfica. Si usáramos embeddings del LLM local (ej. Ollama), el proceso competiría por recursos con el motor de inferencia.
+
+### 2. Estrategia de Chunking
+Se utiliza `RecursiveCharacterTextSplitter` con un `chunk_size` de 1200 caracteres y un `chunk_overlap` de 200. Esto asegura que el contexto semántico no se pierda en los límites de los párrafos, mejorando significativamente la precisión de la recuperación.
+
+### 3. Historial y Memoria Conversacional
+El frontend envía al backend el historial de mensajes recientes (ventana deslizante), el cual es formateado y entregado al LLM junto con los chunks recuperados. Esto permite preguntas de seguimiento y referencias a interacciones pasadas en la misma sesión.
+
+### 4. Observabilidad y Métricas (Sprint 1)
+El sistema ha migrado de ser una "caja negra" a proveer diagnóstico interno:
+- **Trazabilidad de Tiempos:** Se mide de manera independiente el tiempo de recuperación (`retrieval_time_sec`) y el tiempo de inferencia (`generation_time_sec`).
+- **Citaciones Detalladas:** Las respuestas incluyen evidencia explícita: documento de origen, número de página, fragmento de texto original (snippet) y su Score de Similitud (L2 distance).
+- **Logging Persistente y Dashboard (Sprint 2):** Todas las consultas se registran en `backend/logs/chat_logs.jsonl`. La interfaz web incluye un "Panel de Diagnóstico" para visualizar promedios globales e historial de latencias.
+
+### 5. Evaluación Automatizada (LLM-as-a-Judge)
+Para evitar el sesgo de "parece que funciona", DocuMind incorpora una suite de *benchmarking* automatizado:
+- **`backend/benchmark_dataset.json`**: Un dataset estándar de preguntas y respuestas esperadas.
+- **`evaluate.py`**: Un script que ejecuta el pipeline RAG completo sobre el dataset y utiliza un LLM Juez para calcular la precisión semántica (Score 1 al 5) de las respuestas generadas, generando un reporte detallado de rendimiento y precisión.
 
 ---
 
@@ -78,6 +97,13 @@ npm install
 
 # Iniciar el servidor web
 npm run dev
+```
+
+### 4. Ejecutar Pruebas de Calidad RAG (Opcional)
+Para evaluar la precisión del motor de forma automatizada:
+```bash
+# Desde la raíz del proyecto
+python backend/evaluate.py
 ```
 
 ### 4. A disfrutar 🚀

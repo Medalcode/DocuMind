@@ -16,3 +16,5 @@ langchain-groq
 python-multipart
 langchain-huggingface
 sentence-transformers
+docx2txt
+beautifulsoup4

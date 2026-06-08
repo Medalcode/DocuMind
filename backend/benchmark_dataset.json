@@ -1,0 +1,22 @@
+[
+  {
+    "pregunta": "¿Qué es DocuMind y para qué sirve?",
+    "respuesta_esperada": "DocuMind es un sistema RAG (Retrieval-Augmented Generation) avanzado que permite conversar con documentos PDF usando Inteligencia Artificial. Sirve como un asistente personal o cerebro para consultar colecciones de PDFs."
+  },
+  {
+    "pregunta": "¿Cuáles son los modelos o proveedores de IA que soporta DocuMind?",
+    "respuesta_esperada": "DocuMind soporta Ollama (local), OpenAI (GPT-4o), Groq (Llama 3.1) y Google Gemini."
+  },
+  {
+    "pregunta": "¿Qué tecnología usa para el frontend?",
+    "respuesta_esperada": "El frontend de DocuMind está diseñado en React + Vite y utiliza un diseño con estética Glassmorphism."
+  },
+  {
+    "pregunta": "¿Cómo indexa DocuMind los PDFs?",
+    "respuesta_esperada": "DocuMind utiliza HuggingFaceEmbeddings (específicamente el modelo all-MiniLM-L6-v2) ejecutándose nativamente en CPU, y guarda los vectores en ChromaDB."
+  },
+  {
+    "pregunta": "¿Qué base de datos vectorial utiliza el sistema?",
+    "respuesta_esperada": "El sistema utiliza ChromaDB como base de datos vectorial persistente."
+  }
+]

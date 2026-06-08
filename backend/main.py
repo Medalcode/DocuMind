@@ -5,6 +5,7 @@ from typing import List
 from backend.core.engine import DocuMindEngine
 import os
 import shutil
+import json
 
 app = FastAPI(title="DocuMind API")
 
@@ -24,10 +25,14 @@ class ChatRequest(BaseModel):
     provider: str = "ollama"  # ollama, openai, gemini, groq
     model_name: str = "llama3.1"
     api_key: str = None
+    chat_history: List[dict] = []
 
 class LibraryCreateRequest(BaseModel):
     name: str
     folder_name: str
+
+class UrlRequest(BaseModel):
+    url: str
 
 @app.get("/libraries")
 def get_libraries():
@@ -55,7 +60,7 @@ async def upload_files(lib_id: int, files: List[UploadFile] = File(...)):
     
     saved_files = []
     for file in files:
-        if file.filename.lower().endswith('.pdf'):
+        if file.filename.lower().endswith(('.pdf', '.docx', '.txt', '.md')):
             file_path = os.path.join(data_dir, file.filename)
             with open(file_path, "wb") as buffer:
                 shutil.copyfileobj(file.file, buffer)
@@ -68,6 +73,17 @@ def trigger_ingest(background_tasks: BackgroundTasks):
     background_tasks.add_task(engine.auto_ingesta)
     return {"message": "Ingesta iniciada en background"}
 
+@app.post("/libraries/{lib_id}/url")
+async def ingest_url(lib_id: str, payload: UrlRequest):
+    if lib_id not in engine.LIBRARIES:
+        raise HTTPException(status_code=404, detail="Librería no encontrada")
+        
+    success, msg = engine.ingestar_url(lib_id, payload.url)
+    if not success:
+        raise HTTPException(status_code=500, detail=msg)
+        
+    return {"message": msg}
+
 @app.post("/chat")
 def chat(request: ChatRequest):
     chain = engine.get_qa_chain(
@@ -79,11 +95,66 @@ def chat(request: ChatRequest):
     if not chain:
         raise HTTPException(status_code=404, detail="Library not found or config error")
     
-    res = chain.invoke(request.query)
-    sources = list(set([str(doc.metadata.get('page', '?')) for doc in res['source_documents']]))
+    res = chain.invoke(request.query, request.chat_history)
+    
     return {
         "result": res["result"],
-        "sources": sources
+        "sources": res.get("detailed_sources", []),
+        "metrics": res.get("metrics", {})
+    }
+
+@app.get("/logs")
+def get_logs(limit: int = 50):
+    log_file = "backend/logs/chat_logs.jsonl"
+    if not os.path.exists(log_file):
+        return []
+    
+    logs = []
+    with open(log_file, "r", encoding="utf-8") as f:
+        for line in f:
+            if line.strip():
+                logs.append(json.loads(line))
+                
+    # Devolver los últimos X logs invertidos (más recientes primero)
+    return logs[-limit:][::-1]
+
+@app.get("/stats")
+def get_stats():
+    log_file = "backend/logs/chat_logs.jsonl"
+    if not os.path.exists(log_file):
+        return {
+            "total_queries": 0,
+            "avg_retrieval_time": 0.0,
+            "avg_generation_time": 0.0,
+            "avg_total_time": 0.0
+        }
+        
+    total_q = 0
+    sum_retrieval = 0
+    sum_gen = 0
+    sum_total = 0
+    
+    with open(log_file, "r", encoding="utf-8") as f:
+        for line in f:
+            if line.strip():
+                try:
+                    entry = json.loads(line)
+                    m = entry.get("metrics", {})
+                    total_q += 1
+                    sum_retrieval += m.get("retrieval_time_sec", 0)
+                    sum_gen += m.get("generation_time_sec", 0)
+                    sum_total += m.get("total_time_sec", 0)
+                except:
+                    pass
+                    
+    if total_q == 0:
+        return {"total_queries": 0, "avg_retrieval_time": 0, "avg_generation_time": 0, "avg_total_time": 0}
+        
+    return {
+        "total_queries": total_q,
+        "avg_retrieval_time": round(sum_retrieval / total_q, 3),
+        "avg_generation_time": round(sum_gen / total_q, 3),
+        "avg_total_time": round(sum_total / total_q, 3)
     }
 
 if __name__ == "__main__":

@@ -4,7 +4,7 @@ import logging
 from langchain_ollama import ChatOllama
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Chroma
-from langchain_community.document_loaders import PyPDFLoader
+from langchain_community.document_loaders import PyPDFLoader, Docx2txtLoader, TextLoader, WebBaseLoader
 from langchain_core.prompts import PromptTemplate
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_openai import ChatOpenAI
@@ -16,27 +16,102 @@ import yaml
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(name)s %(message)s')
 logger = logging.getLogger("DocuMindEngine")
 
+import json
+from datetime import datetime
+
 class CustomQAChain:
-    def __init__(self, llm, retriever):
+    def __init__(self, llm, vectorstore):
         self.llm = llm
-        self.retriever = retriever
+        self.vectorstore = vectorstore
         self.prompt = PromptTemplate.from_template(
-            "Use the following pieces of context to answer the question at the end.\n"
-            "If you don't know the answer, just say that you don't know, don't try to make up an answer.\n\n"
-            "Context: {context}\n\n"
-            "Question: {question}\n\n"
-            "Helpful Answer:"
+            "Eres un asistente técnico útil y preciso. Usa el siguiente contexto (y el historial de chat si aplica) para responder a la pregunta del usuario.\n"
+            "Si no sabes la respuesta, di claramente que no la sabes, no inventes información.\n\n"
+            "Historial de Chat:\n{chat_history}\n\n"
+            "Contexto recuperado:\n{context}\n\n"
+            "Pregunta: {question}\n\n"
+            "Respuesta:"
         )
     
-    def invoke(self, query):
-        docs = self.retriever.invoke(query)
-        context = "\n\n".join(doc.page_content for doc in docs)
-        prompt_val = self.prompt.format(context=context, question=query)
+    def invoke(self, query, chat_history_list=None):
+        if chat_history_list is None:
+            chat_history_list = []
+            
+        # Formatear el historial
+        chat_history_str = ""
+        for msg in chat_history_list:
+            role = "Usuario" if msg.get("role") == "user" else "DocuMind"
+            chat_history_str += f"{role}: {msg.get('text')}\n"
+            
+        # 1. Medir Retrieval
+        t0 = time.time()
+        docs_and_scores = self.vectorstore.similarity_search_with_score(query, k=3)
+        retrieval_time = time.time() - t0
+        
+        # Preparar contexto y fuentes detalladas
+        context_parts = []
+        detailed_sources = []
+        for doc, score in docs_and_scores:
+            context_parts.append(doc.page_content)
+            source_info = {
+                "content": doc.page_content,
+                "metadata": doc.metadata,
+                "score": float(score)  # L2 distance en Chroma por defecto
+            }
+            detailed_sources.append(source_info)
+            
+        context = "\n\n".join(context_parts)
+        
+        # 2. Medir Generación
+        prompt_val = self.prompt.format(
+            chat_history=chat_history_str, 
+            context=context, 
+            question=query
+        )
+        t1 = time.time()
         res = self.llm.invoke(prompt_val)
+        generation_time = time.time() - t1
+        
+        total_time = time.time() - t0
+        
+        metrics = {
+            "retrieval_time_sec": round(retrieval_time, 3),
+            "generation_time_sec": round(generation_time, 3),
+            "total_time_sec": round(total_time, 3),
+            "chunks_retrieved": len(docs_and_scores)
+        }
+        
+        # Loggear internamente
+        self._log_interaction(query, res.content, detailed_sources, metrics)
+        
         return {
             "result": res.content,
-            "source_documents": docs
+            "detailed_sources": detailed_sources,
+            "metrics": metrics
         }
+        
+    def _log_interaction(self, query, result, sources, metrics):
+        try:
+            log_dir = "backend/logs"
+            os.makedirs(log_dir, exist_ok=True)
+            log_file = os.path.join(log_dir, "chat_logs.jsonl")
+            
+            log_entry = {
+                "timestamp": datetime.now().isoformat(),
+                "query": query,
+                "result": result,
+                "metrics": metrics,
+                "sources_summary": [
+                    {
+                        "source": s["metadata"].get("source", "Unknown"),
+                        "page": s["metadata"].get("page", "?"),
+                        "score": round(s["score"], 4)
+                    } for s in sources
+                ]
+            }
+            with open(log_file, "a", encoding="utf-8") as f:
+                f.write(json.dumps(log_entry, ensure_ascii=False) + "\n")
+        except Exception as e:
+            logger.error(f"Error guardando logs: {e}")
 
 class DocuMindEngine:
     def __init__(self, config_path="backend/config.yaml", embed_model="all-MiniLM-L6-v2"):
@@ -87,53 +162,121 @@ class DocuMindEngine:
             return True
         return False
 
-    def _listar_pdfs(self, ruta):
+    def _listar_documentos(self, ruta):
         if not os.path.exists(ruta):
             return []
-        return [f for f in os.listdir(ruta) if f.lower().endswith(".pdf")]
+        valid_extensions = (".pdf", ".docx", ".txt", ".md")
+        return [f for f in os.listdir(ruta) if f.lower().endswith(valid_extensions)]
 
     def _listar_indexados(self, db_path):
-        index_file = os.path.join(db_path, "indexed_files.txt")
+        index_file = os.path.join(db_path, "indexed_files.json")
         if not os.path.exists(index_file):
-            return set()
-        with open(index_file, "r") as f:
-            return set(line.strip() for line in f)
+            return {}
+        try:
+            with open(index_file, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except:
+            return {}
 
-    def _registrar_indexado(self, db_path, filename):
-        index_file = os.path.join(db_path, "indexed_files.txt")
-        with open(index_file, "a") as f:
-            f.write(filename + "\n")
+    def _registrar_indexados(self, db_path, index_dict):
+        index_file = os.path.join(db_path, "indexed_files.json")
+        with open(index_file, "w", encoding="utf-8") as f:
+            json.dump(index_dict, f, ensure_ascii=False, indent=2)
+
+    def _get_loader(self, file_path):
+        ext = file_path.lower().split('.')[-1]
+        if ext == 'pdf':
+            return PyPDFLoader(file_path)
+        elif ext == 'docx':
+            return Docx2txtLoader(file_path)
+        elif ext in ['txt', 'md']:
+            return TextLoader(file_path, encoding='utf-8')
+        else:
+            raise ValueError(f"Extensión no soportada: {ext}")
 
     def auto_ingesta(self):
-        """Procesa archivos nuevos en todas las bibliotecas."""
+        """Procesa archivos nuevos o modificados en todas las bibliotecas."""
         for key, paths in self.LIBRARIES.items():
             data_dir = paths["data"]
             db_dir = paths["db"]
             os.makedirs(db_dir, exist_ok=True)
             
-            pdfs = self._listar_pdfs(data_dir)
+            documentos = self._listar_documentos(data_dir)
             indexados = self._listar_indexados(db_dir)
-            nuevos = [pdf for pdf in pdfs if pdf not in indexados]
             
-            if not nuevos:
+            docs_a_procesar = []
+            
+            for doc in documentos:
+                file_path = os.path.join(data_dir, doc)
+                mtime = os.path.getmtime(file_path)
+                
+                # Es nuevo o ha sido modificado
+                if doc not in indexados or indexados[doc] < mtime:
+                    docs_a_procesar.append((doc, file_path, mtime, doc in indexados))
+            
+            if not docs_a_procesar:
                 continue
                 
-            logger.info(f"Ingestando {len(nuevos)} PDF(s) en {paths['name']}...")
-            for pdf in nuevos:
+            logger.info(f"Ingestando {len(docs_a_procesar)} documento(s) en {paths['name']}...")
+            
+            # Instanciar el vectorstore una sola vez para borrar si es necesario
+            vectorstore = Chroma(persist_directory=db_dir, embedding_function=self.embeddings)
+            
+            for doc, file_path, mtime, is_update in docs_a_procesar:
                 try:
-                    loader = PyPDFLoader(os.path.join(data_dir, pdf))
+                    # Si es una actualización, borramos los chunks antiguos
+                    if is_update:
+                        logger.info(f"Actualizando {doc} (borrando versión anterior)...")
+                        # Buscar los IDs de los chunks que tienen este 'source'
+                        existing_data = vectorstore.get(where={"source": file_path})
+                        if existing_data and existing_data.get('ids'):
+                            vectorstore.delete(ids=existing_data['ids'])
+                    
+                    loader = self._get_loader(file_path)
                     docs = loader.load()
                     splitter = RecursiveCharacterTextSplitter(chunk_size=1200, chunk_overlap=200)
                     chunks = splitter.split_documents(docs)
-                    Chroma.from_documents(
-                        documents=chunks,
-                        embedding=self.embeddings,
-                        persist_directory=db_dir
-                    )
-                    self._registrar_indexado(db_dir, pdf)
-                    logger.info(f"OK: {pdf}")
+                    
+                    vectorstore.add_documents(documents=chunks)
+                    
+                    # Actualizar registro
+                    indexados[doc] = mtime
+                    self._registrar_indexados(db_dir, indexados)
+                    
+                    logger.info(f"OK: {doc}")
                 except Exception as e:
-                    logger.error(f"Error indexando {pdf}: {str(e)}. Saltando archivo y continuando...")
+                    logger.error(f"Error indexando {doc}: {str(e)}. Saltando archivo y continuando...")
+
+    def ingestar_url(self, lib_id, url):
+        """Descarga e indexa el contenido de una URL web."""
+        if lib_id not in self.LIBRARIES:
+            raise ValueError(f"Librería {lib_id} no existe.")
+            
+        db_dir = self.LIBRARIES[lib_id]["db"]
+        os.makedirs(db_dir, exist_ok=True)
+        
+        logger.info(f"Scrapeando e ingestando URL: {url} en {lib_id}...")
+        
+        try:
+            loader = WebBaseLoader(url)
+            docs = loader.load()
+            
+            # Asegurar que el metadata source sea la url para futuras referencias
+            for doc in docs:
+                if 'source' not in doc.metadata:
+                    doc.metadata['source'] = url
+            
+            splitter = RecursiveCharacterTextSplitter(chunk_size=1200, chunk_overlap=200)
+            chunks = splitter.split_documents(docs)
+            
+            vectorstore = Chroma(persist_directory=db_dir, embedding_function=self.embeddings)
+            vectorstore.add_documents(documents=chunks)
+            
+            logger.info(f"URL ingestada exitosamente: {url}")
+            return True, f"URL indexada correctamente ({len(chunks)} fragmentos generados)."
+        except Exception as e:
+            logger.error(f"Error ingestando URL {url}: {str(e)}")
+            return False, str(e)
 
     def get_qa_chain(self, lib_id, provider="ollama", model_name="llama3.1", api_key=None):
         if lib_id not in self.LIBRARIES:
@@ -154,5 +297,6 @@ class DocuMindEngine:
         else:
             llm = ChatOllama(model=model_name, temperature=0.1)
         
-        retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
-        return CustomQAChain(llm, retriever)
+        # retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
+        # Pasamos el vectorstore directamente para poder usar similarity_search_with_score
+        return CustomQAChain(llm, vectorstore)
