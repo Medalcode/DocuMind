@@ -59,6 +59,10 @@ DocuMind/
 │   └── config.yaml            # Configuración dinámica de los cerebros
 ├── data/                      # Donde se guardan físicamente tus PDFs
 ├── db/                        # Base de datos vectorial persistente (ChromaDB)
+├── skills/                    # Módulo de skills del sistema
+├── tests/                     # Test suite (conftest, ingestion, skill_handler)
+├── graphify-out/              # Knowledge graph (57 nodos, 56 aristas)
+├── .agents/                   # skills.sh skills (tdd)
 ├── requirements.txt           # Dependencias de Python
 ```
 
@@ -111,6 +115,14 @@ Abre tu navegador en `http://localhost:5173`.
 Puedes crear un "Cerebro" nuevo, hacer clic en el 📎 para subir un PDF y empezar a conversar inmediatamente. En la tuerca de configuración (⚙️) puedes poner tu API Key de OpenAI, Gemini o Groq y cambiar el modelo al instante.
 
 ---
+
+## Knowledge Graph
+
+`graphify-out/graph.json` contiene **57 nodos y 56 aristas** del AST del proyecto, permitiendo a agentes AI comprender la arquitectura sin escanear archivos.
+
+## Skills
+
+- **tdd** (skills.sh) — patrones de testing para mantener y expandir la cobertura
 
 ## 🧪 Tests y Extensibilidad
 

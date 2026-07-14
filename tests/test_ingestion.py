@@ -8,7 +8,7 @@ def test_engine_init():
 
 def test_engine_library_data():
     engine = DocuMindEngine()
-    for lib_id, cfg in engine.LIBRARIES.items():
+    for _lib_id, cfg in engine.LIBRARIES.items():
         assert "name" in cfg
         assert "data" in cfg
         assert "db" in cfg

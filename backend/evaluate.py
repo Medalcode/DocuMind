@@ -1,9 +1,9 @@
 import json
 import os
-import time
+
 from core.engine import DocuMindEngine
-from langchain_ollama import ChatOllama
 from langchain_core.prompts import PromptTemplate
+from langchain_ollama import ChatOllama
 
 # Configuración del juez
 JUDGE_MODEL = "llama3.1"
@@ -24,84 +24,82 @@ judge_prompt = PromptTemplate.from_template(
 
 def evaluate():
     print("🚀 Iniciando Benchmark RAG Automatizado...")
-    
+
     # 1. Cargar dataset
     dataset_path = "backend/benchmark_dataset.json"
     if not os.path.exists(dataset_path):
         print(f"❌ No se encontró {dataset_path}")
         return
-        
-    with open(dataset_path, "r", encoding="utf-8") as f:
+
+    with open(dataset_path, encoding="utf-8") as f:
         dataset = json.load(f)
-        
+
     print(f"📚 Dataset cargado con {len(dataset)} preguntas.")
-    
+
     # 2. Iniciar motor
     engine = DocuMindEngine()
     if not engine.LIBRARIES:
         print("❌ No hay ningún 'Cerebro' (Librería) configurado. Crea uno en la interfaz e ingesta el README.pdf para correr esta prueba.")
         return
-        
+
     # Usaremos el primer cerebro disponible
     lib_id = list(engine.LIBRARIES.keys())[0]
     print(f"🧠 Usando Cerebro ID: {lib_id} - '{engine.LIBRARIES[lib_id]['name']}'")
-    
+
     # Obtener la cadena de QA (Probamos el RAG con Ollama por defecto)
     qa_chain = engine.get_qa_chain(lib_id=lib_id, provider="ollama", model_name=JUDGE_MODEL)
     if not qa_chain:
         print("❌ No se pudo crear la cadena QA. ¿Has indexado algún documento en este cerebro?")
         return
-        
+
     # Juez LLM
     judge_llm = ChatOllama(model=JUDGE_MODEL, temperature=0.0)
-    
+
     total_score = 0
     total_time = 0
     results = []
-    
+
     print("\n" + "="*50)
     for i, item in enumerate(dataset, 1):
         pregunta = item["pregunta"]
         esperada = item["respuesta_esperada"]
-        
+
         print(f"\n[{i}/{len(dataset)}] Q: {pregunta}")
-        
+
         # Ejecutar consulta
-        t0 = time.time()
         res = qa_chain.invoke(pregunta)
-        t_total = time.time() - t0
-        
+
         generada = res["result"]
         metrics = res["metrics"]
-        
+
         # Evaluar con el Juez
         prompt_val = judge_prompt.format(
-            pregunta=pregunta, 
-            respuesta_esperada=esperada, 
+            pregunta=pregunta,
+            respuesta_esperada=esperada,
             respuesta_generada=generada
         )
         judge_res = judge_llm.invoke(prompt_val)
-        
+
         # Limpiar output del juez (solo obtener el número)
         try:
             score_str = ''.join(filter(str.isdigit, judge_res.content))
             score = int(score_str) if score_str else 1
-        except:
+        except Exception:
             score = 1
-            
+
         print(f"   A: {generada[:100]}...")
         print(f"   ⏱️ Tiempo: {metrics['total_time_sec']}s | 🤖 Juez Score: {score}/5")
-        
+
         total_score += score
         total_time += metrics['total_time_sec']
-        
+
         results.append({
             "pregunta": pregunta,
             "generada": generada,
             "score": score,
             "tiempo": metrics['total_time_sec']
         })
-        
+
     print("\n" + "="*50)
     print("📊 RESULTADOS FINALES DEL BENCHMARK")
     print("="*50)
@@ -109,6 +107,6 @@ def evaluate():
     print(f"Tiempo total ejecución: {round(total_time, 2)}s")
     print(f"Tiempo promedio por consulta: {round(total_time/len(dataset), 2)}s")
     print(f"Precisión Promedio (LLM-as-a-Judge): {round(total_score/len(dataset), 2)} / 5.0")
-    
+
 if __name__ == "__main__":
     evaluate()

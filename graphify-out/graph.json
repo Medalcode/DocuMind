@@ -1,0 +1,685 @@
+{
+  "nodes": [
+    {
+      "id": 1,
+      "name": "DocuMind",
+      "type": "module",
+      "file": null,
+      "doc": null
+    },
+    {
+      "id": 2,
+      "name": "backend/core.__init__",
+      "type": "module",
+      "file": "backend/core/__init__.py",
+      "doc": null
+    },
+    {
+      "id": 3,
+      "name": "backend/core.engine",
+      "type": "module",
+      "file": "backend/core/engine.py",
+      "doc": null
+    },
+    {
+      "id": 4,
+      "name": "backend/core.engine.CustomQAChain",
+      "type": "class",
+      "file": "backend/core/engine.py",
+      "doc": ""
+    },
+    {
+      "id": 5,
+      "name": "backend/core.engine.CustomQAChain.__init__",
+      "type": "method",
+      "file": "backend/core/engine.py",
+      "doc": null
+    },
+    {
+      "id": 6,
+      "name": "backend/core.engine.CustomQAChain.invoke",
+      "type": "method",
+      "file": "backend/core/engine.py",
+      "doc": null
+    },
+    {
+      "id": 7,
+      "name": "backend/core.engine.CustomQAChain._log_interaction",
+      "type": "method",
+      "file": "backend/core/engine.py",
+      "doc": null
+    },
+    {
+      "id": 8,
+      "name": "backend/core.engine.DocuMindEngine",
+      "type": "class",
+      "file": "backend/core/engine.py",
+      "doc": ""
+    },
+    {
+      "id": 9,
+      "name": "backend/core.engine.DocuMindEngine.__init__",
+      "type": "method",
+      "file": "backend/core/engine.py",
+      "doc": null
+    },
+    {
+      "id": 10,
+      "name": "backend/core.engine.DocuMindEngine._load_config",
+      "type": "method",
+      "file": "backend/core/engine.py",
+      "doc": null
+    },
+    {
+      "id": 11,
+      "name": "backend/core.engine.DocuMindEngine._save_config",
+      "type": "method",
+      "file": "backend/core/engine.py",
+      "doc": null
+    },
+    {
+      "id": 12,
+      "name": "backend/core.engine.DocuMindEngine.add_library",
+      "type": "method",
+      "file": "backend/core/engine.py",
+      "doc": null
+    },
+    {
+      "id": 13,
+      "name": "backend/core.engine.DocuMindEngine.delete_library",
+      "type": "method",
+      "file": "backend/core/engine.py",
+      "doc": null
+    },
+    {
+      "id": 14,
+      "name": "backend/core.engine.DocuMindEngine._listar_documentos",
+      "type": "method",
+      "file": "backend/core/engine.py",
+      "doc": null
+    },
+    {
+      "id": 15,
+      "name": "backend/core.engine.DocuMindEngine._listar_indexados",
+      "type": "method",
+      "file": "backend/core/engine.py",
+      "doc": null
+    },
+    {
+      "id": 16,
+      "name": "backend/core.engine.DocuMindEngine._registrar_indexados",
+      "type": "method",
+      "file": "backend/core/engine.py",
+      "doc": null
+    },
+    {
+      "id": 17,
+      "name": "backend/core.engine.DocuMindEngine._get_loader",
+      "type": "method",
+      "file": "backend/core/engine.py",
+      "doc": null
+    },
+    {
+      "id": 18,
+      "name": "backend/core.engine.DocuMindEngine.auto_ingesta",
+      "type": "method",
+      "file": "backend/core/engine.py",
+      "doc": null
+    },
+    {
+      "id": 19,
+      "name": "backend/core.engine.DocuMindEngine.ingestar_url",
+      "type": "method",
+      "file": "backend/core/engine.py",
+      "doc": null
+    },
+    {
+      "id": 20,
+      "name": "backend/core.engine.DocuMindEngine.get_qa_chain",
+      "type": "method",
+      "file": "backend/core/engine.py",
+      "doc": null
+    },
+    {
+      "id": 21,
+      "name": "backend/core.engine.__init__",
+      "type": "function",
+      "file": "backend/core/engine.py",
+      "doc": ""
+    },
+    {
+      "id": 22,
+      "name": "backend/core.engine.invoke",
+      "type": "function",
+      "file": "backend/core/engine.py",
+      "doc": ""
+    },
+    {
+      "id": 23,
+      "name": "backend/core.engine._log_interaction",
+      "type": "function",
+      "file": "backend/core/engine.py",
+      "doc": ""
+    },
+    {
+      "id": 24,
+      "name": "backend/core.engine._load_config",
+      "type": "function",
+      "file": "backend/core/engine.py",
+      "doc": ""
+    },
+    {
+      "id": 25,
+      "name": "backend/core.engine._save_config",
+      "type": "function",
+      "file": "backend/core/engine.py",
+      "doc": ""
+    },
+    {
+      "id": 26,
+      "name": "backend/core.engine.add_library",
+      "type": "function",
+      "file": "backend/core/engine.py",
+      "doc": ""
+    },
+    {
+      "id": 27,
+      "name": "backend/core.engine.delete_library",
+      "type": "function",
+      "file": "backend/core/engine.py",
+      "doc": ""
+    },
+    {
+      "id": 28,
+      "name": "backend/core.engine._listar_documentos",
+      "type": "function",
+      "file": "backend/core/engine.py",
+      "doc": ""
+    },
+    {
+      "id": 29,
+      "name": "backend/core.engine._listar_indexados",
+      "type": "function",
+      "file": "backend/core/engine.py",
+      "doc": ""
+    },
+    {
+      "id": 30,
+      "name": "backend/core.engine._registrar_indexados",
+      "type": "function",
+      "file": "backend/core/engine.py",
+      "doc": ""
+    },
+    {
+      "id": 31,
+      "name": "backend/core.engine._get_loader",
+      "type": "function",
+      "file": "backend/core/engine.py",
+      "doc": ""
+    },
+    {
+      "id": 32,
+      "name": "backend/core.engine.auto_ingesta",
+      "type": "function",
+      "file": "backend/core/engine.py",
+      "doc": "Procesa archivos nuevos o modificados en todas las bibliotecas."
+    },
+    {
+      "id": 33,
+      "name": "backend/core.engine.ingestar_url",
+      "type": "function",
+      "file": "backend/core/engine.py",
+      "doc": "Descarga e indexa el contenido de una URL web."
+    },
+    {
+      "id": 34,
+      "name": "backend/core.engine.get_qa_chain",
+      "type": "function",
+      "file": "backend/core/engine.py",
+      "doc": ""
+    },
+    {
+      "id": 35,
+      "name": "backend/evaluate",
+      "type": "module",
+      "file": "backend/evaluate.py",
+      "doc": null
+    },
+    {
+      "id": 36,
+      "name": "backend/evaluate.evaluate",
+      "type": "function",
+      "file": "backend/evaluate.py",
+      "doc": ""
+    },
+    {
+      "id": 37,
+      "name": "backend/main",
+      "type": "module",
+      "file": "backend/main.py",
+      "doc": null
+    },
+    {
+      "id": 38,
+      "name": "backend/main.ChatRequest",
+      "type": "class",
+      "file": "backend/main.py",
+      "doc": ""
+    },
+    {
+      "id": 39,
+      "name": "backend/main.LibraryCreateRequest",
+      "type": "class",
+      "file": "backend/main.py",
+      "doc": ""
+    },
+    {
+      "id": 40,
+      "name": "backend/main.UrlRequest",
+      "type": "class",
+      "file": "backend/main.py",
+      "doc": ""
+    },
+    {
+      "id": 41,
+      "name": "backend/main.get_libraries",
+      "type": "function",
+      "file": "backend/main.py",
+      "doc": ""
+    },
+    {
+      "id": 42,
+      "name": "backend/main.create_library",
+      "type": "function",
+      "file": "backend/main.py",
+      "doc": ""
+    },
+    {
+      "id": 43,
+      "name": "backend/main.delete_library",
+      "type": "function",
+      "file": "backend/main.py",
+      "doc": ""
+    },
+    {
+      "id": 44,
+      "name": "backend/main.trigger_ingest",
+      "type": "function",
+      "file": "backend/main.py",
+      "doc": ""
+    },
+    {
+      "id": 45,
+      "name": "backend/main.chat",
+      "type": "function",
+      "file": "backend/main.py",
+      "doc": ""
+    },
+    {
+      "id": 46,
+      "name": "backend/main.get_logs",
+      "type": "function",
+      "file": "backend/main.py",
+      "doc": ""
+    },
+    {
+      "id": 47,
+      "name": "backend/main.get_stats",
+      "type": "function",
+      "file": "backend/main.py",
+      "doc": ""
+    },
+    {
+      "id": 48,
+      "name": "skills/__init__",
+      "type": "module",
+      "file": "skills/__init__.py",
+      "doc": null
+    },
+    {
+      "id": 49,
+      "name": "skills/knowledge_engine.handler",
+      "type": "module",
+      "file": "skills/knowledge_engine/handler.py",
+      "doc": null
+    },
+    {
+      "id": 50,
+      "name": "skills/knowledge_engine.handler.handle",
+      "type": "function",
+      "file": "skills/knowledge_engine/handler.py",
+      "doc": ""
+    },
+    {
+      "id": 51,
+      "name": "tests/conftest",
+      "type": "module",
+      "file": "tests/conftest.py",
+      "doc": null
+    },
+    {
+      "id": 52,
+      "name": "tests/test_ingestion",
+      "type": "module",
+      "file": "tests/test_ingestion.py",
+      "doc": null
+    },
+    {
+      "id": 53,
+      "name": "tests/test_ingestion.test_engine_init",
+      "type": "function",
+      "file": "tests/test_ingestion.py",
+      "doc": ""
+    },
+    {
+      "id": 54,
+      "name": "tests/test_ingestion.test_engine_library_data",
+      "type": "function",
+      "file": "tests/test_ingestion.py",
+      "doc": ""
+    },
+    {
+      "id": 55,
+      "name": "tests/test_skill_handler",
+      "type": "module",
+      "file": "tests/test_skill_handler.py",
+      "doc": null
+    },
+    {
+      "id": 56,
+      "name": "tests/test_skill_handler.test_knowledge_engine_search_fallback",
+      "type": "function",
+      "file": "tests/test_skill_handler.py",
+      "doc": ""
+    },
+    {
+      "id": 57,
+      "name": "tests/test_skill_handler.test_knowledge_engine_ingest_structure",
+      "type": "function",
+      "file": "tests/test_skill_handler.py",
+      "doc": ""
+    }
+  ],
+  "edges": [
+    {
+      "source": 1,
+      "target": 2,
+      "label": "contains"
+    },
+    {
+      "source": 1,
+      "target": 3,
+      "label": "contains"
+    },
+    {
+      "source": 3,
+      "target": 4,
+      "label": "defines"
+    },
+    {
+      "source": 4,
+      "target": 5,
+      "label": "has_method"
+    },
+    {
+      "source": 4,
+      "target": 6,
+      "label": "has_method"
+    },
+    {
+      "source": 4,
+      "target": 7,
+      "label": "has_method"
+    },
+    {
+      "source": 3,
+      "target": 8,
+      "label": "defines"
+    },
+    {
+      "source": 8,
+      "target": 9,
+      "label": "has_method"
+    },
+    {
+      "source": 8,
+      "target": 10,
+      "label": "has_method"
+    },
+    {
+      "source": 8,
+      "target": 11,
+      "label": "has_method"
+    },
+    {
+      "source": 8,
+      "target": 12,
+      "label": "has_method"
+    },
+    {
+      "source": 8,
+      "target": 13,
+      "label": "has_method"
+    },
+    {
+      "source": 8,
+      "target": 14,
+      "label": "has_method"
+    },
+    {
+      "source": 8,
+      "target": 15,
+      "label": "has_method"
+    },
+    {
+      "source": 8,
+      "target": 16,
+      "label": "has_method"
+    },
+    {
+      "source": 8,
+      "target": 17,
+      "label": "has_method"
+    },
+    {
+      "source": 8,
+      "target": 18,
+      "label": "has_method"
+    },
+    {
+      "source": 8,
+      "target": 19,
+      "label": "has_method"
+    },
+    {
+      "source": 8,
+      "target": 20,
+      "label": "has_method"
+    },
+    {
+      "source": 3,
+      "target": 21,
+      "label": "defines"
+    },
+    {
+      "source": 3,
+      "target": 22,
+      "label": "defines"
+    },
+    {
+      "source": 3,
+      "target": 23,
+      "label": "defines"
+    },
+    {
+      "source": 3,
+      "target": 24,
+      "label": "defines"
+    },
+    {
+      "source": 3,
+      "target": 25,
+      "label": "defines"
+    },
+    {
+      "source": 3,
+      "target": 26,
+      "label": "defines"
+    },
+    {
+      "source": 3,
+      "target": 27,
+      "label": "defines"
+    },
+    {
+      "source": 3,
+      "target": 28,
+      "label": "defines"
+    },
+    {
+      "source": 3,
+      "target": 29,
+      "label": "defines"
+    },
+    {
+      "source": 3,
+      "target": 30,
+      "label": "defines"
+    },
+    {
+      "source": 3,
+      "target": 31,
+      "label": "defines"
+    },
+    {
+      "source": 3,
+      "target": 32,
+      "label": "defines"
+    },
+    {
+      "source": 3,
+      "target": 33,
+      "label": "defines"
+    },
+    {
+      "source": 3,
+      "target": 34,
+      "label": "defines"
+    },
+    {
+      "source": 1,
+      "target": 35,
+      "label": "contains"
+    },
+    {
+      "source": 35,
+      "target": 36,
+      "label": "defines"
+    },
+    {
+      "source": 1,
+      "target": 37,
+      "label": "contains"
+    },
+    {
+      "source": 37,
+      "target": 38,
+      "label": "defines"
+    },
+    {
+      "source": 37,
+      "target": 39,
+      "label": "defines"
+    },
+    {
+      "source": 37,
+      "target": 40,
+      "label": "defines"
+    },
+    {
+      "source": 37,
+      "target": 41,
+      "label": "defines"
+    },
+    {
+      "source": 37,
+      "target": 42,
+      "label": "defines"
+    },
+    {
+      "source": 37,
+      "target": 43,
+      "label": "defines"
+    },
+    {
+      "source": 37,
+      "target": 44,
+      "label": "defines"
+    },
+    {
+      "source": 37,
+      "target": 45,
+      "label": "defines"
+    },
+    {
+      "source": 37,
+      "target": 46,
+      "label": "defines"
+    },
+    {
+      "source": 37,
+      "target": 47,
+      "label": "defines"
+    },
+    {
+      "source": 1,
+      "target": 48,
+      "label": "contains"
+    },
+    {
+      "source": 1,
+      "target": 49,
+      "label": "contains"
+    },
+    {
+      "source": 49,
+      "target": 50,
+      "label": "defines"
+    },
+    {
+      "source": 1,
+      "target": 51,
+      "label": "contains"
+    },
+    {
+      "source": 1,
+      "target": 52,
+      "label": "contains"
+    },
+    {
+      "source": 52,
+      "target": 53,
+      "label": "defines"
+    },
+    {
+      "source": 52,
+      "target": 54,
+      "label": "defines"
+    },
+    {
+      "source": 1,
+      "target": 55,
+      "label": "contains"
+    },
+    {
+      "source": 55,
+      "target": 56,
+      "label": "defines"
+    },
+    {
+      "source": 55,
+      "target": 57,
+      "label": "defines"
+    }
+  ]
+}

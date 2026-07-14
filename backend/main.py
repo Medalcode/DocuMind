@@ -1,11 +1,12 @@
-from fastapi import FastAPI, BackgroundTasks, HTTPException, UploadFile, File
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from typing import List
-from backend.core.engine import DocuMindEngine
+import json
 import os
 import shutil
-import json
+
+from fastapi import BackgroundTasks, FastAPI, File, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+
+from backend.core.engine import DocuMindEngine
 
 app = FastAPI(title="DocuMind API")
 
@@ -25,7 +26,7 @@ class ChatRequest(BaseModel):
     provider: str = "ollama"  # ollama, openai, gemini, groq
     model_name: str = "llama3.1"
     api_key: str = None
-    chat_history: List[dict] = []
+    chat_history: list[dict] = []
 
 class LibraryCreateRequest(BaseModel):
     name: str
@@ -51,13 +52,13 @@ def delete_library(lib_id: int):
     return {"message": "Deleted successfully"}
 
 @app.post("/libraries/{lib_id}/upload")
-async def upload_files(lib_id: int, files: List[UploadFile] = File(...)):
+async def upload_files(lib_id: int, files: list[UploadFile] = File(...)):
     if lib_id not in engine.LIBRARIES:
         raise HTTPException(status_code=404, detail="Library not found")
-        
+
     data_dir = engine.LIBRARIES[lib_id]["data"]
     os.makedirs(data_dir, exist_ok=True)
-    
+
     saved_files = []
     for file in files:
         if file.filename.lower().endswith(('.pdf', '.docx', '.txt', '.md')):
@@ -65,7 +66,7 @@ async def upload_files(lib_id: int, files: List[UploadFile] = File(...)):
             with open(file_path, "wb") as buffer:
                 shutil.copyfileobj(file.file, buffer)
             saved_files.append(file.filename)
-            
+
     return {"message": "Files uploaded successfully", "files": saved_files}
 
 @app.post("/ingest")
@@ -77,11 +78,11 @@ def trigger_ingest(background_tasks: BackgroundTasks):
 async def ingest_url(lib_id: str, payload: UrlRequest):
     if lib_id not in engine.LIBRARIES:
         raise HTTPException(status_code=404, detail="Librería no encontrada")
-        
+
     success, msg = engine.ingestar_url(lib_id, payload.url)
     if not success:
         raise HTTPException(status_code=500, detail=msg)
-        
+
     return {"message": msg}
 
 @app.post("/chat")
@@ -94,9 +95,9 @@ def chat(request: ChatRequest):
     )
     if not chain:
         raise HTTPException(status_code=404, detail="Library not found or config error")
-    
+
     res = chain.invoke(request.query, request.chat_history)
-    
+
     return {
         "result": res["result"],
         "sources": res.get("detailed_sources", []),
@@ -108,13 +109,13 @@ def get_logs(limit: int = 50):
     log_file = "backend/logs/chat_logs.jsonl"
     if not os.path.exists(log_file):
         return []
-    
+
     logs = []
-    with open(log_file, "r", encoding="utf-8") as f:
+    with open(log_file, encoding="utf-8") as f:
         for line in f:
             if line.strip():
                 logs.append(json.loads(line))
-                
+
     # Devolver los últimos X logs invertidos (más recientes primero)
     return logs[-limit:][::-1]
 
@@ -128,13 +129,13 @@ def get_stats():
             "avg_generation_time": 0.0,
             "avg_total_time": 0.0
         }
-        
+
     total_q = 0
     sum_retrieval = 0
     sum_gen = 0
     sum_total = 0
-    
-    with open(log_file, "r", encoding="utf-8") as f:
+
+    with open(log_file, encoding="utf-8") as f:
         for line in f:
             if line.strip():
                 try:
@@ -144,12 +145,12 @@ def get_stats():
                     sum_retrieval += m.get("retrieval_time_sec", 0)
                     sum_gen += m.get("generation_time_sec", 0)
                     sum_total += m.get("total_time_sec", 0)
-                except:
+                except Exception:
                     pass
-                    
+
     if total_q == 0:
         return {"total_queries": 0, "avg_retrieval_time": 0, "avg_generation_time": 0, "avg_total_time": 0}
-        
+
     return {
         "total_queries": total_q,
         "avg_retrieval_time": round(sum_retrieval / total_q, 3),
