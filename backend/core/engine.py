@@ -74,7 +74,17 @@ class CustomQAChain:
             question=query
         )
         t1 = time.time()
-        res = self.llm.invoke(prompt_val)
+        try:
+            res = self.llm.invoke(prompt_val)
+            result_content = res.content
+        except Exception as e:
+            logger.error(f"Error invoking LLM: {e}")
+            error_str = str(e).lower()
+            if "connection" in error_str or "conexi" in error_str or "10061" in error_str or "timeout" in error_str or "ollama" in error_str:
+                result_content = "⚠️ Error: No se pudo conectar con la IA local (Ollama). Por favor, asegúrate de que Ollama está instalado y ejecutándose en tu máquina."
+            else:
+                result_content = f"⚠️ Error generando respuesta: {str(e)}"
+        
         generation_time = time.time() - t1
 
         total_time = time.time() - t0
@@ -87,10 +97,10 @@ class CustomQAChain:
         }
 
         # Loggear internamente
-        self._log_interaction(query, res.content, detailed_sources, metrics)
+        self._log_interaction(query, result_content, detailed_sources, metrics)
 
         return {
-            "result": res.content,
+            "result": result_content,
             "detailed_sources": detailed_sources,
             "metrics": metrics
         }

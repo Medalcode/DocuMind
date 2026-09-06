@@ -70,12 +70,15 @@ function App() {
     }
   };
 
-  const handleIngest = async () => {
+  const handleIngest = async (show_alert = false) => {
+    setIsUploading(true);
     try {
       await axios.post(`${API_URL}/ingest`);
-      alert("Proceso de auto-ingesta iniciado en segundo plano.");
+      if (show_alert) alert("Ingesta completada. Los documentos están listos para ser consultados.");
     } catch (err) {
-      alert("Error iniciando ingesta.");
+      alert("Error procesando los documentos.");
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -242,7 +245,7 @@ function App() {
         </div>
 
         <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          <button className="library-btn" onClick={handleIngest}>
+          <button className="library-btn" onClick={() => handleIngest(true)}>
             <RefreshCw size={18} />
             Forzar Ingesta
           </button>
@@ -273,7 +276,7 @@ function App() {
             <div style={{ margin: 'auto', textAlign: 'center', color: 'var(--text-secondary)' }}>
               <Bot size={48} style={{ opacity: 0.2, margin: '0 auto 1rem' }} />
               <h3>Bienvenido a DocuMind</h3>
-              <p style={{ marginTop: '0.5rem', opacity: 0.7 }}>Selecciona un cerebro y haz una pregunta sobre la documentación local.</p>
+              <p style={{ marginTop: '0.5rem', opacity: 0.7 }}>Selecciona o crea un cerebro, sube tus documentos y haz una pregunta sobre tu base de conocimiento local.</p>
             </div>
           ) : (
             messages.map((msg, idx) => (
@@ -291,9 +294,9 @@ function App() {
                       Total: {msg.metrics.total_time_sec}s | Retrieval: {msg.metrics.retrieval_time_sec}s | Gen: {msg.metrics.generation_time_sec}s | Chunks: {msg.metrics.chunks_retrieved}
                     </div>
                   )}
-                  {msg.sources && msg.sources.length > 0 && (
-                    <div className="sources-container" style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Fuentes Recuperadas:</div>
+                  {msg.sources && msg.sources.length > 0 && !msg.text.includes("⚠️ Error") && (
+                    <div className="sources-container" style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '0.5rem' }}>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}><Info size={14}/> Citas / Fuentes de respaldo:</div>
                       {msg.sources.map((src, i) => (
                         <div key={i} className="source-card" style={{ background: 'rgba(255,255,255,0.05)', padding: '0.5rem', borderRadius: '6px', fontSize: '0.8rem' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', color: 'var(--accent)' }}>

@@ -3,3 +3,11 @@ libraries:
     name: Tareas
     data: data/tareas
     db: db/tareas
+  2:
+    name: Test SDD01 Library
+    data: data/test_lib
+    db: db/test_lib
+  3:
+    name: Test SDD01 Library
+    data: data/test_lib
+    db: db/test_lib

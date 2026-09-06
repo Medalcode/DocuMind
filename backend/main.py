@@ -70,9 +70,9 @@ async def upload_files(lib_id: int, files: list[UploadFile] = File(...)):
     return {"message": "Files uploaded successfully", "files": saved_files}
 
 @app.post("/ingest")
-def trigger_ingest(background_tasks: BackgroundTasks):
-    background_tasks.add_task(engine.auto_ingesta)
-    return {"message": "Ingesta iniciada en background"}
+def trigger_ingest():
+    engine.auto_ingesta()
+    return {"message": "Ingesta completada"}
 
 @app.post("/libraries/{lib_id}/url")
 async def ingest_url(lib_id: str, payload: UrlRequest):
